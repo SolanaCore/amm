@@ -3,26 +3,25 @@ name = "v1"
 version = "0.0.1"
 edition = "2021"
 description = "A pinocchio-based AMM contract"
-readme = "README.md"  # Ensure README.md exists
+readme = "README.md"
 
 [lib]
-crate-type = ["cdylib"]  
+crate-type = ["cdylib"]
 
 [dependencies]
 num-rational = "0.4.2"
 pinocchio = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }
-pinocchio-associated-token-account = "0.2.0"  
-pinocchio-log = "0.4.0"                     
-pinocchio-pubkey = "0.2.4"                  
-pinocchio-system = "0.2.3"                  
-pinocchio-token = "0.4.0"
+pinocchio-associated-token-account = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }
+pinocchio-log = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }
+pinocchio-pubkey = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }
+pinocchio-system = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }
+pinocchio-token = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }
 shank = "0.4.2"
 thiserror = "2.0.12"
 
 [dev-dependencies]
-solana-sdk = "2.2.1"
-mollusk-svm = "0.2.0"
-mollusk-svm-bencher = "0.2.0"
+solana-sdk = "1.18"
+solana-program-test = "1.18"
 
 [features]
 no-entrypoint = []
@@ -34,7 +33,3 @@ lto = true
 codegen-units = 1
 panic = "abort"
 strip = true
-
-
-[patch.crates-io]
-pinocchio = { git = "https://github.com/anza-xyz/pinocchio", branch = "main" }

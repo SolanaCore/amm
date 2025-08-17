@@ -6,7 +6,8 @@ use pinocchio::{
 };
 use shank::ShankAccount;
 use crate::utils::validate_pda;
-use crate::{utils::{load_acc_mut_unchecked, DataLen}, errors::SolanaCoreError, states::InitPool, instructions::SolanaCoreInstruction};
+use crate::{utils::{load_acc_mut_unchecked, DataLen}, errors::SolanaCoreError, states::InitPool};
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq, ShankAccount)]
 pub struct Pool {
@@ -47,32 +48,47 @@ impl Pool {
 
     #[inline(always)]
     pub fn init_pool(pool: &AccountInfo, ix_data: &InitPool) -> ProgramResult {
-        let pool_acc = unsafe { load_acc_mut_unchecked::<Pool>(pool.borrow_mut_data_unchecked()) }?;
+        let pool_acc = unsafe { 
+            match load_acc_mut_unchecked::<Pool>(pool.borrow_mut_data_unchecked()) {
+                Ok(acc) => acc,
+                Err(_) => return Err(SolanaCoreError::InvalidAccountData.into()),
+            }
+        };
+
         let fees_bps_bytes = ix_data.fees_bps.to_le_bytes();
         let pool_seeds: &[&[u8]] = &[
-          Self::POOL_SEED.as_bytes(),
-          ix_data.token_0_mint.as_ref(),
-          ix_data.token_1_mint.as_ref(), // I assume this was a typo; you had token_0 twice
-          &fees_bps_bytes,
-          &[ix_data.pool_bump],
-          ];        //.key() returns a reference to that value
-        validate_pda(pool_seeds, pool.key());
+            Self::POOL_SEED.as_bytes(),
+            ix_data.token_0_mint.as_ref(),
+            ix_data.token_1_mint.as_ref(),
+            &fees_bps_bytes,
+            &[ix_data.pool_bump],
+        ];
+        
+        match validate_pda(pool_seeds, pool.key()) {
+            Ok(_) => {},
+            Err(_) => return Err(SolanaCoreError::PdaMismatch.into()),
+        }
+
         pool_acc.token_0_mint = ix_data.token_0_mint;
         pool_acc.token_1_mint = ix_data.token_1_mint;
         pool_acc.token_0_amount = ix_data.token_0_amount;
         pool_acc.token_1_amount = ix_data.token_1_amount;
-
         pool_acc.vault_0 = ix_data.vault_0;
-        
         pool_acc.vault_1 = ix_data.vault_1;
         pool_acc.pool_bump = ix_data.pool_bump;
-        if ix_data.fees_bps <= 500 {
+        
+        if ix_data.fees_bps > 500 {
             return Err(SolanaCoreError::InvalidInstructionData.into());
         }
         pool_acc.fees_bps = ix_data.fees_bps;
+        
         // lp_mint(is_pda)
-        let lp_seeds = &[Self::LP_SEED.as_bytes(), pool.key(), &[ix_data.lp_bump]];
-        validate_pda(lp_seeds, &ix_data.lp_mint);
+        let lp_seeds = &[Self::LP_SEED.as_bytes(), pool.key().as_ref(), &[ix_data.lp_bump]];
+        match validate_pda(lp_seeds, &ix_data.lp_mint) {
+            Ok(_) => {},
+            Err(_) => return Err(SolanaCoreError::PdaMismatch.into()),
+        }
+        
         pool_acc.lp_mint = ix_data.lp_mint;
         pool_acc.lp_bump = ix_data.lp_bump;
         
