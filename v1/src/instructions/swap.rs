@@ -48,7 +48,7 @@ pub fn swap(accounts: &[AccountInfo], data: &[u8]) -> Result<(), SolanaCoreError
     let fees_token_0 = ix_data.token_0_amount * (pool_acc.fees_bps / 100);
 
     //transfer token_0 -> vault
-    TransferChecked {
+    let _ = TransferChecked {
         from: token_0_ata,
         mint: token_0_mint,
         to: vault_0_ata,
@@ -59,7 +59,7 @@ pub fn swap(accounts: &[AccountInfo], data: &[u8]) -> Result<(), SolanaCoreError
     //Slippage_bps feature also 
     let token_1_out = calculate_token_out(ix_data.token_0_amount - (ix_data.token_0_amount * (pool_acc.fees_bps/100)), ix_data.expected_token_1_amount, ix_data.slippage_bps, pool_acc.token_0_amount, pool_acc.token_1_amount).unwrap(); 
     //vault_1 to token_1
-    TransferChecked {
+    let _ = TransferChecked {
         from: vault_1_ata,
         mint: token_1_mint,
         to: token_1_ata,

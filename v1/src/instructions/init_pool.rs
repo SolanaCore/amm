@@ -69,101 +69,80 @@ pub fn init_pool(accounts: &[AccountInfo], data: &[u8]) -> Result<(), SolanaCore
 
     let lp_signer_seed_slices: &[&[u8]] = &lp_signer_seed_slices;
     
-    validate_pda(lp_signer_seed_slices, lp_mint.key())?;
+    let _ = validate_pda(lp_signer_seed_slices, lp_mint.key())?;
 
     msg!("Creating pool account");
     
-    match (CreateAccount {
+    let _ = CreateAccount {
         from: signer,
         to: pool,
         space: Pool::LEN as u64,
         owner: &crate::ID,
         lamports: rent.minimum_balance(Pool::LEN),
-    }).invoke_signed(pool_signers.as_slice()) {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke_signed(pool_signers.as_slice());
 
     msg!("Creating vault ATAs");
 
-    match (Create {
+    let _ = Create {
         funding_account: signer,
         account: vault_0_ata,
         wallet: pool,
         mint: token_0_mint,
         system_program,
         token_program,
-    }).invoke() {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke();
 
-    match (Create {
+    let _ = Create {
         funding_account: signer,
         account: vault_1_ata,
         wallet: pool,
         mint: token_1_mint,
         system_program,
         token_program,
-    }).invoke() {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke();
 
     msg!("Transferring initial tokens");
 
-    match (TransferChecked {
+    let _ = TransferChecked {
         from: token_0_ata,
         mint: token_0_mint,
         to: vault_0_ata,
         authority: signer,
         amount: ix_data.token_0_amount,
         decimals: 9
-    }).invoke() {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke();
 
-    match (TransferChecked {
+    let _ = TransferChecked {
         from: token_1_ata,
         mint: token_1_mint,
         to: vault_1_ata,
         authority: signer,
         amount: ix_data.token_1_amount,
         decimals: 9,
-    }).invoke() {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke();
 
     msg!("Initializing LP mint");
 
-    match (InitializeMint {
+    let _ = InitializeMint {
         mint: lp_mint,
         rent_sysvar: sysvar_rent_acc,
         decimals: 9,
         mint_authority: pool.key(),
         freeze_authority: Some(pool.key()),
-    }).invoke() {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke();
 
     // Calculate LP tokens to mint: L = sqrt(x * y)
     let lp_to_mint = ((ix_data.token_0_amount as f64) * (ix_data.token_1_amount as f64)).sqrt() as u64;
 
     msg!("Minting LP tokens");
 
-    match (MintToChecked {
+    let _ = MintToChecked {
         mint: lp_mint,
         account: lp_user_ata,
         mint_authority: pool,
         amount: lp_to_mint,
         decimals: 9,
-    }).invoke_signed(pool_signers.as_slice()) {
-        Ok(_) => {},
-        Err(_) => return Err(SolanaCoreError::InvalidInstructionData),
-    }
+    }.invoke_signed(pool_signers.as_slice());
 
     msg!("Initializing pool state");
 
