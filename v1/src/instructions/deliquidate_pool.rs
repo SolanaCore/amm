@@ -54,7 +54,7 @@ let signer_seed_slices: Vec<&[u8]> = signer_seeds.iter()
 // now it's &[&[u8]]
 let signer_seed_slices: &[&[u8]] = &signer_seed_slices;
 
-    validate_pda(signer_seed_slices as &[&[u8]], pool.key());
+    let _ = validate_pda(signer_seed_slices as &[&[u8]], pool.key());
 
     let lp_bump = [pool_acc.lp_bump];
     let lp_signer_seeds = [
@@ -72,13 +72,13 @@ let signer_seed_slices: &[&[u8]] = &signer_seed_slices;
     // now it's &[&[u8]]
     let lp_signer_seed_slices: &[&[u8]] = &lp_signer_seed_slices;
 
-    validate_pda(lp_signer_seed_slices as &[&[u8]], lp_mint.key());
+    let _ = validate_pda(lp_signer_seed_slices as &[&[u8]], lp_mint.key());
 
     // check the ratio in which they are withdrawing token
     let (lp_to_burn, max_token_0, max_token_1)= lp_to_burn(ix_data.withdraw_token_0_amount, ix_data.withdraw_token_1_amount, pool_acc.token_0_amount, pool_acc.token_1_amount, get_mint_supply(lp_mint).unwrap());
 
     // burn lp_token
-    BurnChecked {
+    let _ = BurnChecked {
         account: lp_user_ata, 
         mint: lp_mint, 
         authority: pool, 
@@ -87,7 +87,7 @@ let signer_seed_slices: &[&[u8]] = &signer_seed_slices;
     }.invoke_signed(&pool_signers);
 
     // transfer token_0 to user
-    TransferChecked {
+    let _ = TransferChecked {
         from: vault_0_ata,
         mint: token_0_mint,
         to: token_0_ata,
@@ -97,7 +97,7 @@ let signer_seed_slices: &[&[u8]] = &signer_seed_slices;
     }.invoke_signed(&pool_signers);
 
     // transfer token_1 to user
-    TransferChecked {
+    let _ = TransferChecked {
         from: vault_1_ata,
         mint: token_1_mint,
         to: token_1_ata,
