@@ -38,7 +38,7 @@ pub fn liquidate_pool(accounts: &[AccountInfo], data: &[u8]) -> Result<(), Solan
 
     let pool_signers = [Signer::from(&signer_seeds[..])];
     let signer_seed_slices: Vec<&[u8]> = signer_seeds.iter().map(|s| s.as_ref()).collect();
-    validate_pda(&signer_seed_slices, pool.key());
+    let _ =validate_pda(&signer_seed_slices, pool.key());
 
     let lp_bump = [pool_acc.lp_bump];
     let lp_signer_seeds = [
@@ -48,7 +48,7 @@ pub fn liquidate_pool(accounts: &[AccountInfo], data: &[u8]) -> Result<(), Solan
     ];
 
     let lp_signer_seed_slices: Vec<&[u8]> = lp_signer_seeds.iter().map(|s| s.as_ref()).collect();
-    validate_pda(&lp_signer_seed_slices, lp_mint.key());
+    let _ = validate_pda(&lp_signer_seed_slices, lp_mint.key());
 
     let (lp_to_mint, max_token_0, max_token_1) = lp_to_mint(
         ix_data.deposit_token_0_amount,
@@ -59,7 +59,7 @@ pub fn liquidate_pool(accounts: &[AccountInfo], data: &[u8]) -> Result<(), Solan
     ).expect("Return lp_mint, max_token_0, max_token_1");
 
     // Mint LP tokens
-    MintToChecked {
+    let _ = MintToChecked {
         mint: lp_mint,
         account: lp_user_ata,
         mint_authority: pool,
@@ -68,7 +68,7 @@ pub fn liquidate_pool(accounts: &[AccountInfo], data: &[u8]) -> Result<(), Solan
     }.invoke_signed(&pool_signers);
 
     // Transfer token_0 to vault_0
-    TransferChecked {
+    let _ = TransferChecked {
         from: token_0_ata,
         mint: token_0_mint,
         to: vault_0_ata,
@@ -78,7 +78,7 @@ pub fn liquidate_pool(accounts: &[AccountInfo], data: &[u8]) -> Result<(), Solan
     }.invoke_signed(&pool_signers);
 
     // Transfer token_1 to vault_1
-    TransferChecked {
+    let _ = TransferChecked {
         from: token_1_ata,
         mint: token_1_mint,
         to: vault_1_ata,

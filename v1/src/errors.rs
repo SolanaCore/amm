@@ -13,11 +13,18 @@ pub enum SolanaCoreError {
     AccountAlreadyInitialized,
     MissingRequiredSignature,
     OverFlowDetected,
-    Slippage
+    Slippage,
 }
 
 impl From<SolanaCoreError> for ProgramError {
     fn from(e: SolanaCoreError) -> Self {
         Self::Custom(e as u32)
     }
-}       
+}
+
+impl From<ProgramError> for SolanaCoreError {
+    fn from(_e: ProgramError) -> Self {
+        // For simplicity, we'll map all ProgramErrors to InvalidInstructionData
+        SolanaCoreError::InvalidInstructionData
+    }
+}
