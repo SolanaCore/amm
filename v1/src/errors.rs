@@ -1,8 +1,10 @@
 use pinocchio::program_error::ProgramError;
 use solana_program::{decode_error::DecodeError, msg, program_error::PrintProgramError};
 use thiserror::Error;
+use num_derive::FromPrimitive; // derive macro
 
-#[derive(Debug, Clone, PartialEq, shank::ShankType, Error)]
+
+#[derive(Debug, Clone, PartialEq, shank::ShankType, Error, FromPrimitive)]
 pub enum SolanaCoreError {
     #[error("Invalid instruction data")]
     InvalidInstructionData,
