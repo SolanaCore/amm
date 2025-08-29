@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '20'
           solana-cli-version: '1.18.26'
-          build-script: 'cargo build-sbf'
+          build-script: 'cargo install --git https://github.com/4rjunc/solana-chio --force && chio build'
           # Add --skip-local-validator else the build would fail and another tip is to add --skip-build flag to fasten up the workflow because we have already built it in the anchor build
           x-ray-enabled: true
           working-directory: './v1'
