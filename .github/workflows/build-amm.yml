@@ -1,0 +1,23 @@
+name: AMM CI
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test-program:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Solana Environment
+        uses: DhruvWebDev/solana-setup-action@v0.1.8
+        with:
+          node-version: '20'
+          solana-cli-version: '1.18.26'
+          build-script: 'cargo build-sbf'
+          # Add --skip-local-validator else the build would fail and another tip is to add --skip-build flag to fasten up the workflow because we have already built it in the anchor build
+          x-ray-enabled: true
+          working-directory: './v1'
